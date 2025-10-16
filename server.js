@@ -100,22 +100,23 @@ app.post("/postLike/:postId", authMiddleware, async (req, res) => {
   const params = req.params;
 
   const postId = params.postId;
-  const post = postModel.findById(user._id);
+  const post = await postModel.findById(postId);
 
-  const postLike = await post.like;
+  const postLikes = post.like;
 
-  const isLiked = postLike.includes(user._id);
+  const isLiked = postLikes.includes(postId);
+
   if (isLiked) {
-    postModel.findByIdAndUpdate(postId, {
-      like: postLike.filter((likes) => likes.toString() !== user._id),
+    await postModel.findByIdAndUpdate(postId, {
+      like: postLikes.filter((likes) => likes.toString() !== user._id),
     });
   } else {
-    postModel.findByIdAndUpdate(postId, {
-      like: [...postLike, user._id],
+    await postModel.findByIdAndUpdate(postId, {
+      like: [...postLikes, user._id],
     });
   }
   res.status(200).json({ message: "success" });
-});             
+});
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });
